@@ -1,0 +1,10 @@
+obstacle_range: 9.5
+raytrace_range: 10.0
+footprint: [[-0.2,-0.2],[-0.2,0.2], [0.2, 0.2], [0.2,-0.2]]
+inflation_radius: 0.25
+cost_scaling_factor: 10.0
+observation_sources: laser_scan_sensor point_cloud_sensor
+
+laser_scan_sensor: {sensor_frame: quad/camera__link, data_type: LaserScan, topic: /sim_scan, marking: true, clearing: true}
+
+point_cloud_sensor: {sensor_frame: 'quad/camera__link', data_type: PointCloud2, topic: '/quad/camera_/depth/points', marking: true, clearing: true}

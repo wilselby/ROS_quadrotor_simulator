@@ -1,0 +1,7 @@
+obstacle_range: 5.0
+raytrace_range: 10.0
+footprint: [[-0.2,-0.2],[-0.2,0.2], [0.2, 0.2], [0.2,-0.2]]
+inflation_radius: 0.5
+cost_scaling_factor: 10.0
+observation_sources: scan
+scan: {sensor_frame: quad/camera__link, data_type: LaserScan, topic: /sim_scan, marking: true, clearing: true}

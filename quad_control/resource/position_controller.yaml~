@@ -1,0 +1,6 @@
+# Position controller parameters
+x_PID: {P: 0.75, I: 0.5, D: 0.85, I_max: 2.0 }
+y_PID: {P: 0.75, I: 0.5, D: .85, I_max: 2.0 }
+z_PID: {P: 20, I: 0.5, D: 4.5, I_max: 2.0 }
+yaw_PID: {P: 5, I: 0.5, D: 2.5, I_max: 2.0 }
+

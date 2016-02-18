@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+  <world name="default">
+    <gui>
+      <camera name="user_camera">
+        <pose>-10.0 -5.0 5.0 0.000000 0.443643 0.352194</pose>
+      </camera>
+    </gui>
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <include>
+      <uri>model://willowgarage</uri>
+      <name>willow_garage</name>
+      <static>true</static>
+      <pose>-10.85 4.53 0 0 0 0</pose>
+    </include>
+  </world>
+</sdf>

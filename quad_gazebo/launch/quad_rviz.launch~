@@ -1,0 +1,43 @@
+<?xml version="1.0"?>
+
+<launch>
+
+   <param name="robot_description" 
+   command="$(find xacro)/xacro.py '$(find quad_description)/urdf/kit_c.xacro'"/>
+
+  <!-- We do not have a robot connected, so publish fake joint states -->
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" ></node>
+
+  <!-- Given the published joint states, publish tf for the robot links -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+  <!-- Visualisation RVIZ -->
+  <node pkg="rviz" type="rviz" name="rviz" args="-d $(find quad_gazebo)/resource/quad_kinect.rviz" output="screen"/>
+  
+
+</launch>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

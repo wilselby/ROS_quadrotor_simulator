@@ -1,0 +1,8 @@
+# Attitude controller parameters
+roll_PID: {P: 5, I: 0.5, D: 0.5, I_max: 2.0 }
+pitch_PID: {P: 5, I: 0.5, D: 0.5, I_max: 2.0 }
+yaw_PID: {P: 5, I: 0.5, D: 0.5, I_max: 2.0 }
+
+
+#attitude_gain: {x: 3, y: 3, z: 0.035}
+#angular_rate_gain: {x: 0.52, y: 0.52, z: 0.025}

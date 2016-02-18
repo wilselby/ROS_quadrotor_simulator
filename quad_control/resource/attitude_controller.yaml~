@@ -1,0 +1,10 @@
+# Attitude controller parameters
+roll_PID: {P: 5, I: 0.5, D: 0.5, I_max: 2.0 }
+pitch_PID: {P: 5, I: 0.5, D: 0.5, I_max: 2.0 }
+yaw_PID: {P: 5, I: 0.5, D: 0.5, I_max: 2.0 }
+
+# Rate controller parameters
+p_PID: {P: 2.5, I: 0.5, D: 1.5, I_max: 2.0 }
+q_PID: {P: 2.5, I: 0.5, D: 1.5, I_max: 2.0 }
+r_PID: {P: 5, I: 0.5, D: 0.5, I_max: 2.0 }
+

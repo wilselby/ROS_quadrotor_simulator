@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  <!-- <env name="ROSCONSOLE_CONFIG_FILE" value="$(find quad_control)/custom_rosconsole.conf"/> -->
+
+  <arg name="enable_logging" default="false"/>
+  <arg name="enable_ground_truth" default="true"/>
+  <arg name="log_file" default="quad"/>
+  <arg name="headless" default="true"/>
+  <arg name="gui" default="true"/>
+
+  <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find quad_gazebo)/worlds/quad_basic.world"/> 
+    <!-- more default parameters can be changed here -->
+    <arg name="debug" value="false" /> 
+    <arg name="paused" value="true"/>
+    <arg name="headless" value="$(arg headless)"/>
+    <arg name="gui" value="$(arg gui)"/>
+  </include>
+
+  <!-- Spawn 3DR Model -->
+   <include file="$(find quad_gazebo)/launch/spawn/spawn_quad.launch">
+    <arg name="model" value="$(find quad_description)/urdf/kit_c_base.xacro" />  
+    <arg name="enable_logging" value="$(arg enable_logging)" />
+    <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />
+    <arg name="log_file" value="$(arg log_file)"/>
+  </include>
+
+  <!-- We do not have a robot connected, so publish fake joint states -->
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" ></node>
+
+  <!-- Given the published joint states, publish tf for the robot links -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+
+  <group ns="quad">
+    <node name="joy_node" pkg="joy" type="joy_node" />
+    <node name="quad_joystick_interface" pkg="quad_joystick_interface" type="quad_joystick_interface" output="screen"/> 
+    <node name="waypoint_node" pkg="quad_control" type="waypoint_publisher_node" output="screen"/> 
+    <node name="position_controller_node" pkg="quad_control" type="position_controller_node" output="screen"> 
+      <rosparam command="load" file="$(find quad_gazebo)/resource/kit_c.yaml" /> 
+      <rosparam command="load" file="$(find quad_control)/resource/position_controller.yaml" /> 
+    </node> 
+    <node name="attitude_controller_node" pkg="quad_control" type="attitude_controller_node" output="screen"> 
+      <rosparam command="load" file="$(find quad_gazebo)/resource/kit_c.yaml" /> 
+      <rosparam command="load" file="$(find quad_control)/resource/attitude_controller.yaml" />  
+    </node> 
+  </group>
+
+</launch>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,20 @@
+<?xml version="1.0" ?>
+<sdf version="1.4">
+  <world name="default">
+    <!-- place user camera -->
+    <gui>
+      <camera name="user_camera">
+        <pose> 6.0 -18.0 10.0 0.000000 0.45 1.8</pose>
+      </camera>
+    </gui>
+    <include>
+      <uri>model://ground_plane</uri>
+    </include>
+    <include>
+      <uri>model://sun</uri>
+    </include>
+    <include>
+      <uri>model://kitchen_dining</uri>
+    </include>
+  </world>
+</sdf>
