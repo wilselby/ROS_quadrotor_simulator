@@ -1,0 +1,8 @@
+moveit_setup_assistant_config:
+  URDF:
+    package: quad_description
+    relative_path: urdf/kit_c_kinect.xacro
+  SRDF:
+    relative_path: config/quad.srdf
+  CONFIG:
+    generated_timestamp: 1455977137

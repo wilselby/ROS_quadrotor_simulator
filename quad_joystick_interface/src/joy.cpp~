@@ -142,7 +142,7 @@ void Joy::Publish() {
     trajectory_msg.jerk.x = 1;	//Flag for position_controller_node
   }
   else {
-    trajectory_msg.jerk.x = 0; 
+    trajectory_msg.jerk.x = 0;  //Flag for position_controller_node
     ctrl_pub_.publish(control_msg_);
   }  
 

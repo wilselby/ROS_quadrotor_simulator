@@ -109,7 +109,7 @@ class Joy {
   ToggleSwitch auto_mode_switch;
   int gps_mode;
   int mission_mode;
-  int auto_mode
+  int auto_mode;
 
   mav_msgs::CommandRollPitchYawrateThrust control_msg_;
   mav_msgs::CommandTrajectory trajectory_msg;

@@ -45,6 +45,7 @@ struct Buttons {
   int ctrl_enable_gps;
   int ctrl_enable_mission;
   int ctrl_enable_autonomous;
+  int ctrl_enable_3dnav;
 };
 
 struct Max {

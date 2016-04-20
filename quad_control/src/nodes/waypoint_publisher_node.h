@@ -81,6 +81,7 @@ class WaypointPublisherNode {
   ros::Subscriber cmd_pos_sub_;
   ros::Subscriber odometry_sub_;
   ros::Subscriber cmd_vel_sub_;
+  ros::Subscriber cmd_threednav_sub_;
 
   //Publisher
   ros::Publisher trajectory_pub;
@@ -89,6 +90,7 @@ class WaypointPublisherNode {
   planning_msgs::EigenWayPoint current_waypoint_;
   planning_msgs::WayPoint desired_waypoint;
   mav_msgs::EigenCommandTrajectory command_trajectory;
+  mav_msgs::EigenCommandTrajectory threedNav_trajectory;
   mav_msgs::CommandTrajectory desired_wp;
   nav_msgs::Odometry current_gps_;
 
@@ -98,6 +100,7 @@ class WaypointPublisherNode {
 
   ControllerUtility control_mode;
   ControllerUtility auto_mode;
+  ControllerUtility threednav_mode;
  
   WaypointWithTime waypoint_utility;
   std::vector<WaypointWithTime> waypoints;
@@ -114,6 +117,7 @@ class WaypointPublisherNode {
   void CommandTrajectoryCallback(const mav_msgs::CommandTrajectoryConstPtr& command_trajectory_msg);
   void OdometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg);
   void CommandVelCallback(const geometry_msgs::TwistConstPtr& command_velocity_msg);
+  void threedNavCallback(const mav_msgs::CommandTrajectoryConstPtr& threed_nav_msg);
 
 };
 
