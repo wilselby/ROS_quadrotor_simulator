@@ -21,7 +21,7 @@
   </include>
 
   <!-- Spawn 3DR Model -->
-   <include file="$(find quad_gazebo)/launch/spawn/spawn_quad.launch">
+   <include file="$(find quad_gazebo)/launch/spawn/spawn_quad_cam.launch">
     <arg name="model" value="$(find quad_description)/urdf/kit_c_base.xacro" />  
     <arg name="enable_logging" value="$(arg enable_logging)" />
     <arg name="enable_ground_truth" value="$(arg enable_ground_truth)" />

@@ -4,9 +4,10 @@ Panels:
     Name: Displays
     Property Tree Widget:
       Expanded:
+        - /Status1
         - /MotionPlanning1
       Splitter Ratio: 0.74256
-    Tree Height: 363
+    Tree Height: 327
   - Class: rviz/Help
     Name: Help
   - Class: rviz/Views
@@ -32,7 +33,7 @@ Visualization Manager:
         Y: 0
         Z: 0
       Plane: XY
-      Plane Cell Count: 10
+      Plane Cell Count: 100
       Reference Frame: <Fixed Frame>
       Value: true
     - Class: moveit_rviz_plugin/MotionPlanning
@@ -50,9 +51,9 @@ Visualization Manager:
           Y: 0
           Z: 1.5
         Size:
-          X: 10
-          Y: 10
-          Z: 3
+          X: 20
+          Y: 20
+          Z: 5
       Name: MotionPlanning
       Planned Path:
         Interrupt Display: false
@@ -236,10 +237,10 @@ Visualization Manager:
         Z: 2.23518e-07
       Name: Current View
       Near Clip Distance: 0.01
-      Pitch: 0.839797
+      Pitch: 1.1248
       Target Frame: base_link
       Value: XYOrbit (rviz)
-      Yaw: 5.19995
+      Yaw: 5.22995
     Saved: ~
 Window Geometry:
   Displays:
@@ -251,7 +252,7 @@ Window Geometry:
   Hide Right Dock: false
   Motion Planning:
     collapsed: false
-  QMainWindow State: 000000ff00000000fd0000000100000000000002b1000003bcfc0200000005fb000000100044006900730070006c006100790073010000002800000200000000dd00fffffffb0000000800480065006c00700000000342000000bb0000007600fffffffb0000000a0056006900650077007300000003b0000000b0000000b000fffffffb0000000c00430061006d00650072006100000002ff000001610000000000000000fb0000001e004d006f00740069006f006e00200050006c0061006e006e0069006e0067010000022e000001b6000001ab00ffffff00000280000003bc00000001000000020000000100000002fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000100000000000002b1000003bcfc0200000005fb000000100044006900730070006c0061007900730100000028000001dc000000dd00fffffffb0000000800480065006c00700000000342000000bb0000007600fffffffb0000000a0056006900650077007300000003b0000000b0000000b000fffffffb0000000c00430061006d00650072006100000002ff000001610000000000000000fb0000001e004d006f00740069006f006e00200050006c0061006e006e0069006e0067010000020a000001da000001cc00ffffff00000280000003bc00000001000000020000000100000002fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Views:
     collapsed: false
   Width: 1335

@@ -72,10 +72,6 @@
     <param name="odom_frame" value="world"/>
   </node>
 
-  <!-- Load a Map
-  <node name="map_server" pkg="map_server" type="map_server" args=" $(find quad_description)/maps/wg_map.yaml" />
-  -->
-
   <!-- Visualisation RVIZ -->
   <node pkg="rviz" type="rviz" name="rviz" args="-d $(find quad_description)/resource/quad_laser.rviz" output="screen"/>
   

@@ -67,7 +67,7 @@
   </node>
 
   <!-- Load a Map  -->
-  <node name="map_server" pkg="map_server" type="map_server" args=" $(find quad_2dnav)/maps/wg_map.yaml" />
+  <node name="map_server" pkg="map_server" type="map_server" args=" $(find quad_2dnav)/maps/WG_map2.yaml" />
  
   <!-- Load AMCL  -->
   <include file="$(find quad_2dnav)/launch/amcl_quad.launch" />

@@ -4,7 +4,7 @@
 
   <!-- <env name="ROSCONSOLE_CONFIG_FILE" value="$(find quad_control)/custom_rosconsole.conf"/> -->
 
-  <arg name="enable_logging" default="true"/>
+  <arg name="enable_logging" default="false"/>
   <arg name="enable_ground_truth" default="true"/>
   <arg name="log_file" default="quad"/>
   <arg name="headless" default="true"/>

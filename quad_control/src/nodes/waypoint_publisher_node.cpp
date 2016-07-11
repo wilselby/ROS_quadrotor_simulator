@@ -24,7 +24,7 @@ namespace quad_control {
 
 std::vector<quad_control::WaypointWithTime> WaypointWithTime::Read_waypoints(std::vector<quad_control::WaypointWithTime> waypoints){
 
-  std::ifstream wp_file("/home/wil/ros/catkin_ws/src/arducopter_slam/quad_control/resource/kitchen_waypoints.txt"); 
+  std::ifstream wp_file("/home/wil/ros/catkin_ws/src/arducopter_slam/quad_control/resource/kitchen_short_waypoints.txt"); 
   //wg_waypoints.txt  kitchen_waypoints.txt
 
   if (wp_file.is_open()) {
@@ -81,6 +81,10 @@ void WaypointPublisherNode::InitializeParams(){
   current_time = ros::Time::now().toSec(); 
   start_time = ros::Time::now().toSec(); 
   i = 0;
+
+  threedNav_trajectory.position(0) = 0.0;
+  threedNav_trajectory.position(1) = 0.0;
+  threedNav_trajectory.position(2) = 0.0;
 
   ROS_INFO_ONCE("Waypoint_publisher_node Paramters Initialized.");
 
@@ -235,13 +239,25 @@ void WaypointPublisherNode::OdometryCallback(const nav_msgs::OdometryConstPtr& o
 
     ROS_INFO("3d Navigation Mode triggered");
 
+
     //Rotate into BF
     waypointBF = control_mode.rotateGFtoBF(threedNav_trajectory.position(0)-current_gps_.pose.pose.position.x, threedNav_trajectory.position(1)-current_gps_.pose.pose.position.y, threedNav_trajectory.position(2), 0, 0, gps_yaw);
 
-    desired_wp.position.x = (current_gps_.pose.pose.position.x + waypointBF(0));
-    desired_wp.position.y = (current_gps_.pose.pose.position.y + waypointBF(1));
-    desired_wp.position.z = threedNav_trajectory.position(2);    
-    desired_wp.yaw = threedNav_trajectory.yaw;
+    if( (threedNav_trajectory.position(0)==0.0) && (threedNav_trajectory.position(1)==0.0) && (threedNav_trajectory.position(2)==0.0)){
+	desired_wp.position.x = current_gps_.pose.pose.position.x;
+    	desired_wp.position.y = current_gps_.pose.pose.position.y;
+    	desired_wp.position.z = current_gps_.pose.pose.position.z;
+    	desired_wp.yaw = gps_yaw;
+    }
+    else{
+    	//desired_wp.position.x = threedNav_trajectory.position(0);
+    	//desired_wp.position.y = threedNav_trajectory.position(1);
+
+    	desired_wp.position.x = (current_gps_.pose.pose.position.x + waypointBF(0));
+    	desired_wp.position.y = (current_gps_.pose.pose.position.y + waypointBF(1));
+    	desired_wp.position.z = threedNav_trajectory.position(2);    
+    	desired_wp.yaw = threedNav_trajectory.yaw;
+    }
 
     desired_wp.jerk.x = 1;	//Set flag for position controller
 
