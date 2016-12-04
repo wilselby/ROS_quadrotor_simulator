@@ -132,9 +132,8 @@ RotorS is a UAV gazebo simulator developed by the Autonomous Systems Laboratory 
 
 ```
 $ cd $WORKSPACE/src
-$ git clone https://github.com/alexbuyval/rotors_simulator.git
+$ git clone https://github.com/wilselby/rotors_simulator
 $ cd rotors_simulator
-$ git checkout sonar_plugin
 ```
 
 Check for any missing dependencies. It may throw an error of missing dependency on [gflags_catkin] for package "glog_catkin", but this error does not seem to disrupt the compilation (catkin_make).
@@ -234,7 +233,7 @@ $ roslaunch quad_gazebo quad_joystick_gps_empty_world.launch
 
 Lastly, the package has a waypoint mode which allows the quadrotor to follow a pre-defined set of waypoints. The “waypoint mission” mode reads in a waypoint file that contains a series of waypoints and the time for them to be sent. First, the quadrotor must be in “GPS mode.” If enabled by pushing the “Y” button by default, the waypoint node will send each waypoint at the defined time. This allows users to develop and implement autonomous waypoint missions to navigate the quadrotor around the Gazebo world. 
 
-The waypoint files are stored in the quad_control/resource folder and are loaded in the waypoint_publisher_node. The kitchen world series of waypoint is loaded by default and can be tested by running the following command:
+The waypoint files are stored in the quad_control/resource folder and are loaded in the waypoint_publisher_node. Each line in the waypoint file is a waypoint and has the following entries [time (s), x, y, z, yaw (deg)]. The kitchen world series of waypoint is loaded by default and can be tested by running the following command:
 
 ```
 $ roslaunch quad_gazebo quad_joystick_gps_kinect_kitchen.launch
