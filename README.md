@@ -151,7 +151,7 @@ $ source devel/setup.bash
 $ catkin_make
 ```
 
-## Install Xbox 360 Controller 
+### Install Xbox 360 Controller 
 
 Install the integrated Ubuntu Xbox driver
 
@@ -172,7 +172,7 @@ The ROS wiki also contains a tutorial (http://wiki.ros.org/joy/Tutorials/Configu
 <param name="dev" type="string" value="/dev/input/js0" />
 ```
 
-## Model Verification
+### Model Verification
 See https://www.wilselby.com/research/ros-integration/model-dynamics-sensors/ for a more detailed walk through
 
 A command line tool check_urdf attempts to parse a file as a URDF description, and either prints a description of the resulting kinematic chain, or an error message. The first command creates a urdf file from the xacro file.
@@ -242,6 +242,8 @@ $ roslaunch quad_gazebo quad_joystick_gps_kinect_kitchen.launch
 ## 2D Mapping and Navigation
 Once the quadrotor can reliably and stably navigate the environment based on a series of desired waypoints, the quadrotor system can be used to sense and comprehend it’s surrounding environment. A map is a representation of the environment where the quadrotor is operating. To operate in the map, the quadrotor needs to know its position in the map coordinate frame. Ultimately, the goal is to develop a system that allows the quadrotor to autonomously reach a desired goal state in the map.
 
+A detailed walk through of the mapping process and utilization of Rviz for setting goals is available here: https://www.wilselby.com/research/ros-integration/2d-mapping-navigation/
+
 In order to make an initial map of the environment, a series of waypoints was recorded. These waypoints maneuvered the quadrotor from its initial position outside the office complex, in and around several rooms, and returning back to the initial position. Note that the waypoint_publisher_node needs to be updated to read the wg_waypoints.txt file since this section uses the Willow Garage world by default.
 
 ```
@@ -290,7 +292,11 @@ This project is licensed under the MIT License
 ## Acknowledgments and References
 
 https://pixhawk.org/dev/ros/sitl
+
 http://wiki.ros.org/indigo/Installation/Ubuntu
+
 http://gazebosim.org/tutorials?tut=drcsim_install
+
 http://dev.ardupilot.com/wiki/using-rosgazebo-simulator-with-sitl/
+
 https://github.com/AurelienRoy/ardupilot_sitl_ros_tutorial/tree/master/scripts
