@@ -5,4 +5,6 @@ moveit_setup_assistant_config:
   SRDF:
     relative_path: config/quad.srdf
   CONFIG:
-    generated_timestamp: 1455977137
+    author_name: Wil Selby
+    author_email: accounts@wilselby.com
+    generated_timestamp: 1497563034

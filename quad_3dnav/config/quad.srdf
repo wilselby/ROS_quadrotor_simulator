@@ -13,8 +13,6 @@
         <link name="base_link" />
         <joint name="virtual_joint" />
     </group>
-    <!--END EFFECTOR: Purpose: Represent information about an end effector.
-    <end_effector name="Quad_end" parent_link="base_link" group="Quad_base" /> -->
     <!--VIRTUAL JOINT: Purpose: this element defines a virtual joint between a robot link and an external frame of reference (considered fixed with respect to the robot)-->
     <virtual_joint name="virtual_joint" type="floating" parent_frame="world" child_link="base_link" />
     <!--PASSIVE JOINT: Purpose: this element is used to mark joints that are not actuated-->

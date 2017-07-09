@@ -118,7 +118,7 @@ void Joy::JoyCallback(const sensor_msgs::JoyConstPtr& msg) {
   trajectory_msg.jerk.y = msg->buttons[buttons_.ctrl_enable_mission];
   auto_mode = msg->buttons[buttons_.ctrl_enable_autonomous];	// enable auto
   trajectory_msg.jerk.z = msg->buttons[buttons_.ctrl_enable_autonomous];
-  trajectory_msg.snap.z = msg->buttons[buttons_.ctrl_enable_3dnav];	// land
+  trajectory_msg.snap.z = msg->buttons[buttons_.ctrl_enable_3dnav];	// 3D nav
 
   //Control message header information
   ros::Time update_time = ros::Time::now();

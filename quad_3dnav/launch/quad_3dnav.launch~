@@ -17,7 +17,7 @@
     <arg name="world_name" value="$(find quad_gazebo)/worlds/kitchen.world"/>  
     <!-- more default parameters can be changed here -->
     <arg name="debug" value="false" /> 
-    <arg name="paused" value="true"/>
+    <arg name="paused" value="false"/>
     <arg name="headless" value="$(arg headless)"/>
     <arg name="gui" value="$(arg gui)"/>
   </include>
