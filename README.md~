@@ -186,14 +186,12 @@ See https://www.wilselby.com/research/ros-integration/model-dynamics-sensors/ fo
 A command line tool check_urdf attempts to parse a file as a URDF description, and either prints a description of the resulting kinematic chain, or an error message. The first command creates a urdf file from the xacro file.
 
 ```
-$ cd ros/catkin_ws/src/arducopter_slam/quad_description/urdf
 $ rosrun xacro xacro.py kit_c.xacro -o /tmp/kit_c.urdf
 ```
 
 Then run the urdf check:
 
 ```
-$ cd /tmp/
 $ check_urdf kit_c.urdf
 ```
 
