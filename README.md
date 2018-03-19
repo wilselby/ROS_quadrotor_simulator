@@ -1,4 +1,6 @@
 # ROS Quadrotor Simulator
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fwilselby%2FROS_quadrotor_simulator.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fwilselby%2FROS_quadrotor_simulator?ref=badge_shield)
+
 
 This project focuses on simulating a quadrotor aerial vehicle for the development of flight control systems, autonomous navigation, obstacle avoidance, and path planning. This software relies on the Robot Operating System (ROS) software. ROS provides hardware abstraction, device drivers, libraries, visualizers, message-passing, package management, and more. Along with ROS, Gazebo is used for simulation. Gazebo offers the ability to accurately and efficiently simulate populations of robots in complex indoor and outdoor environments. 
 
@@ -298,6 +300,9 @@ $ roslaunch quad_3dnav quad_3dnav.launch
 ## License
 
 This project is licensed under the MIT License
+
+
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fwilselby%2FROS_quadrotor_simulator.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fwilselby%2FROS_quadrotor_simulator?ref=badge_large)
 
 ## Acknowledgments and References
 
