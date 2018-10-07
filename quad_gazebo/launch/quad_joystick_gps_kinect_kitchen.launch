@@ -63,7 +63,7 @@
   <arg name="rviz" default="true" />
   <arg name="rtabmapviz" default="false" /> 
 
-  <param name="use_sim_time" type="bool" value="True"/>  
+  <param name="use_sim_time" type="bool" value="False"/>  
 
   <group ns="rtabmap">
   <!-- Visualisation RVIZ -->

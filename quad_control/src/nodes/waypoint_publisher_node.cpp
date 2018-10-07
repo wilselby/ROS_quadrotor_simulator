@@ -24,7 +24,7 @@ namespace quad_control {
 
 std::vector<quad_control::WaypointWithTime> WaypointWithTime::Read_waypoints(std::vector<quad_control::WaypointWithTime> waypoints){
 
-  std::ifstream wp_file("/home/wil/ros/catkin_ws/src/arducopter_slam/quad_control/resource/kitchen_short_waypoints.txt"); 
+  std::ifstream wp_file("/home/developer/Development/ros/src/ROS_quadrotor_simulator/quad_control/resource/kitchen_short_waypoints.txt"); 
   //wg_waypoints.txt  kitchen_waypoints.txt
 
   if (wp_file.is_open()) {
@@ -56,6 +56,7 @@ WaypointPublisherNode::WaypointPublisherNode(){
   odometry_sub_ = nh.subscribe("ground_truth/odometry", 10, &WaypointPublisherNode::OdometryCallback, this);
   cmd_vel_sub_ = nh.subscribe("/cmd_vel", 10, &WaypointPublisherNode::CommandVelCallback, this);
   cmd_threednav_sub_ = nh.subscribe("/cmd_3dnav", 10, &WaypointPublisherNode::threedNavCallback, this);
+  live_waypoint_sub_ = nh.subscribe("/clicked_point", 100, &WaypointPublisherNode::wayPointCallback, this);
 
   //Publisher
   trajectory_pub = nh.advertise<mav_msgs::CommandTrajectory>("command/waypoint", 10);
@@ -114,6 +115,11 @@ void WaypointPublisherNode::threedNavCallback(const mav_msgs::CommandTrajectoryC
   //Convert to Eigen
   mav_msgs::eigenCommandTrajectoryFromMsg(*threed_nav_msg, &threedNav_trajectory);
 
+}
+
+void WaypointPublisherNode::wayPointCallback(const geometry_msgs::PointStampedConstPtr& pointStampped)
+{
+  printf("I received point: (%f, %f, %f)", pointStampped->point.x, pointStampped->point.y, pointStampped->point.z);
 }
 
 void WaypointPublisherNode::OdometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg){
@@ -176,26 +182,26 @@ void WaypointPublisherNode::OdometryCallback(const nav_msgs::OdometryConstPtr& o
       printf("Start publishing #%d waypoints \n", size);
 
       waypoints_read = 1;
+    }
+
+    if(i < waypoints.size()){
+
+      const WaypointWithTime& wp = waypoints[i];
+
+      if(!published){ 
+
+        printf("Publishing #%d x=%f y=%f z=%f yaw=%f, and wait for %fs. \n", (int)i, wp.wp.position.x, wp.wp.position.y, wp.wp.position.z, wp.wp.yaw, wp.waiting_time);
+
+        published = 1;
+        start_time = ros::Time::now().toSec();
       }
 
-      if(i < waypoints.size()){
+      if((current_time-start_time) < wp.waiting_time){
 
-	const WaypointWithTime& wp = waypoints[i];
-
-	if(!published){	
-
-	printf("Publishing #%d x=%f y=%f z=%f yaw=%f, and wait for %fs. \n", (int)i, wp.wp.position.x, wp.wp.position.y, wp.wp.position.z, wp.wp.yaw, wp.waiting_time);
-
-	published = 1;
-	start_time = ros::Time::now().toSec();
-	}
-
-	if((current_time-start_time) < wp.waiting_time){
-
-	//Rotate into BF
+        //Rotate into BF
         waypointBF = control_mode.rotateGFtoBF(wp.wp.position.x-current_gps_.pose.pose.position.x, wp.wp.position.y-current_gps_.pose.pose.position.y, wp.wp.position.z, 0, 0, gps_yaw);
 
-	desired_wp.position.x = (current_gps_.pose.pose.position.x + waypointBF(0));
+        desired_wp.position.x = (current_gps_.pose.pose.position.x + waypointBF(0));
         desired_wp.position.y = (current_gps_.pose.pose.position.y + waypointBF(1));
         desired_wp.position.z = wp.wp.position.z;
         desired_wp.yaw = wp.wp.yaw;
@@ -206,17 +212,17 @@ void WaypointPublisherNode::OdometryCallback(const nav_msgs::OdometryConstPtr& o
         desired_wp.header.frame_id = "desired_mission_frame";
         trajectory_pub.publish(desired_wp);
 
-	current_time = ros::Time::now().toSec();
+        current_time = ros::Time::now().toSec();
  
-	}
-	else{
-	  
-	  i = i + 1;
-	  published = 0;
-
-	}        
-
       }
+      else{
+    
+        i = i + 1;
+        published = 0;
+
+      }        
+
+    }
   }
   //Autonomous Mode triggered
   else if(auto_mode.GetSwitchValue()){
@@ -229,7 +235,7 @@ void WaypointPublisherNode::OdometryCallback(const nav_msgs::OdometryConstPtr& o
     desired_wp.position.z = desired_wp.position.z + cmd_vel.linear.z;
     desired_wp.yaw = gps_yaw + cmd_vel.angular.z;
 
-    desired_wp.jerk.x = 1;	//Set flag for position controller
+    desired_wp.jerk.x = 1;  //Set flag for position controller
 
     desired_wp.header.stamp = ros::Time::now();
     desired_wp.header.frame_id = "desired_auto_frame";
@@ -244,22 +250,22 @@ void WaypointPublisherNode::OdometryCallback(const nav_msgs::OdometryConstPtr& o
     waypointBF = control_mode.rotateGFtoBF(threedNav_trajectory.position(0)-current_gps_.pose.pose.position.x, threedNav_trajectory.position(1)-current_gps_.pose.pose.position.y, threedNav_trajectory.position(2), 0, 0, gps_yaw);
 
     if( (threedNav_trajectory.position(0)==0.0) && (threedNav_trajectory.position(1)==0.0) && (threedNav_trajectory.position(2)==0.0)){
-	desired_wp.position.x = current_gps_.pose.pose.position.x;
-    	desired_wp.position.y = current_gps_.pose.pose.position.y;
-    	desired_wp.position.z = current_gps_.pose.pose.position.z;
-    	desired_wp.yaw = gps_yaw;
+  desired_wp.position.x = current_gps_.pose.pose.position.x;
+      desired_wp.position.y = current_gps_.pose.pose.position.y;
+      desired_wp.position.z = current_gps_.pose.pose.position.z;
+      desired_wp.yaw = gps_yaw;
     }
     else{
-    	//desired_wp.position.x = threedNav_trajectory.position(0);
-    	//desired_wp.position.y = threedNav_trajectory.position(1);
+      //desired_wp.position.x = threedNav_trajectory.position(0);
+      //desired_wp.position.y = threedNav_trajectory.position(1);
 
-    	desired_wp.position.x = (current_gps_.pose.pose.position.x + waypointBF(0));
-    	desired_wp.position.y = (current_gps_.pose.pose.position.y + waypointBF(1));
-    	desired_wp.position.z = threedNav_trajectory.position(2);    
-    	desired_wp.yaw = threedNav_trajectory.yaw;
+      desired_wp.position.x = (current_gps_.pose.pose.position.x + waypointBF(0));
+      desired_wp.position.y = (current_gps_.pose.pose.position.y + waypointBF(1));
+      desired_wp.position.z = threedNav_trajectory.position(2);    
+      desired_wp.yaw = threedNav_trajectory.yaw;
     }
 
-    desired_wp.jerk.x = 1;	//Set flag for position controller
+    desired_wp.jerk.x = 1;  //Set flag for position controller
 
     desired_wp.header.stamp = ros::Time::now();
     desired_wp.header.frame_id = "3dnav_mission_frame";
@@ -275,10 +281,10 @@ void WaypointPublisherNode::OdometryCallback(const nav_msgs::OdometryConstPtr& o
    published = 0;
 
   //modes
-  desired_wp.snap.x = command_trajectory.snap(0);	// takeoff
-  desired_wp.snap.y = command_trajectory.snap(1);	// land
-  desired_wp.jerk.x = command_trajectory.jerk(0);	//enable GPS
-  desired_wp.jerk.y = 0.0;	// enable mission
+  desired_wp.snap.x = command_trajectory.snap(0); // takeoff
+  desired_wp.snap.y = command_trajectory.snap(1); // land
+  desired_wp.jerk.x = command_trajectory.jerk(0); //enable GPS
+  desired_wp.jerk.y = 0.0;  // enable mission
 
   desired_wp.header.stamp = ros::Time::now();
   desired_wp.header.frame_id = "desired_waypoint_frame";

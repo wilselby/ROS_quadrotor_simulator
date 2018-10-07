@@ -37,6 +37,7 @@
 #include <planning_msgs/conversions.h>
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/TwistStamped.h>
+#include <geometry_msgs/PointStamped.h>
 #include <ros/ros.h>
 #include <ros/callback_queue.h>
 #include <tf/transform_broadcaster.h>
@@ -82,6 +83,7 @@ class WaypointPublisherNode {
   ros::Subscriber odometry_sub_;
   ros::Subscriber cmd_vel_sub_;
   ros::Subscriber cmd_threednav_sub_;
+  ros::Subscriber live_waypoint_sub_;
 
   //Publisher
   ros::Publisher trajectory_pub;
@@ -118,6 +120,7 @@ class WaypointPublisherNode {
   void OdometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg);
   void CommandVelCallback(const geometry_msgs::TwistConstPtr& command_velocity_msg);
   void threedNavCallback(const mav_msgs::CommandTrajectoryConstPtr& threed_nav_msg);
+  void wayPointCallback(const geometry_msgs::PointStampedConstPtr& pointStampped);
 
 };
 
