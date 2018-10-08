@@ -37,7 +37,10 @@
 #include <planning_msgs/conversions.h>
 #include <nav_msgs/Odometry.h>
 #include <geometry_msgs/TwistStamped.h>
+#include <geometry_msgs/Point.h>
 #include <geometry_msgs/PointStamped.h>
+#include <geometry_msgs/PolygonStamped.h>
+#include <visualization_msgs/Marker.h>
 #include <ros/ros.h>
 #include <ros/callback_queue.h>
 #include <tf/transform_broadcaster.h>
@@ -66,6 +69,7 @@ class WaypointWithTime {
   const float DEG_2_RAD = M_PI / 180.0;
 
   std::vector<quad_control::WaypointWithTime> Read_waypoints(std::vector<quad_control::WaypointWithTime> waypoints);
+  quad_control::WaypointWithTime PointToWaypointWithTime(const geometry_msgs::Point32& point);
 };
 
 class WaypointPublisherNode {
@@ -87,6 +91,13 @@ class WaypointPublisherNode {
 
   //Publisher
   ros::Publisher trajectory_pub;
+  ros::Publisher point_viz_pub_;
+  ros::WallTimer point_viz_timer_;
+
+  // Visualization
+  geometry_msgs::PolygonStamped input_;
+  bool waiting_for_center_;
+  bool waypoints_ready;
 
   //Waypoint variables
   planning_msgs::EigenWayPoint current_waypoint_;
@@ -121,6 +132,10 @@ class WaypointPublisherNode {
   void CommandVelCallback(const geometry_msgs::TwistConstPtr& command_velocity_msg);
   void threedNavCallback(const mav_msgs::CommandTrajectoryConstPtr& threed_nav_msg);
   void wayPointCallback(const geometry_msgs::PointStampedConstPtr& pointStampped);
+  void vizPubCallback();
+  void publishNextWayPoints();
+  void readWayPointsFromFile();
+  void liveWayPointsFromRviz();
 
 };
 

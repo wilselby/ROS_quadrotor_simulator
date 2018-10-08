@@ -19,6 +19,10 @@
  */
 
 #include "waypoint_publisher_node.h"
+#include <costmap_2d/costmap_2d_ros.h>
+#include <costmap_2d/costmap_2d.h>
+#include <costmap_2d/footprint.h>
+#include <boost/foreach.hpp>
 
 namespace quad_control {
 
@@ -45,6 +49,70 @@ std::vector<quad_control::WaypointWithTime> WaypointWithTime::Read_waypoints(std
 
 }
 
+quad_control::WaypointWithTime WaypointWithTime::PointToWaypointWithTime(const geometry_msgs::Point32& point) {
+  const static float yaw = 90.0;
+  const static double time = 2.5;
+  return  WaypointWithTime(time, point.x, point.y, point.z, yaw * DEG_2_RAD);
+}
+
+/**
+* @brief Calculate distance between two points
+* @param one Point one
+* @param two Point two
+* @return Distance between two points
+*/
+template<typename T, typename S>
+double pointsDistance(const T &one, const S &two){
+    return sqrt(pow(one.x-two.x,2.0) + pow(one.y-two.y,2.0) + pow(one.z-two.z,2.0));
+}
+
+/**
+* @brief Calculate polygon perimeter
+* @param polygon Polygon to process
+* @return Perimeter of polygon
+*/
+double polygonPerimeter(const geometry_msgs::Polygon &polygon){
+    double perimeter = 0;
+    if(polygon.points.size()   > 1)
+    {
+      for (int i = 0, j = polygon.points.size() - 1; i < polygon.points.size(); j = i++)
+      {
+        perimeter += pointsDistance(polygon.points[i], polygon.points[j]);
+      }
+    }
+    return perimeter;
+}
+
+/**
+* @brief Evaluate whether two points are approximately adjacent, within a specified proximity distance.
+* @param one Point one
+* @param two Point two
+* @param proximity Proximity distance
+* @return True if approximately adjacent, false otherwise
+*/
+template<typename T, typename S>
+bool pointsNearby(const T &one, const S &two, const double &proximity){
+      return pointsDistance(one, two) <= proximity;
+}
+
+/**
+* @brief Evaluate if point is inside area defined by polygon. Undefined behaviour for points on line.
+* @param point Point to test
+* @param polygon Polygon to test
+* @return True if point is inside polygon, false otherwise
+*/
+template<typename T>
+bool pointInPolygon(const T &point, const geometry_msgs::Polygon &polygon){
+    int cross = 0;
+    for (int i = 0, j = polygon.points.size()-1; i < polygon.points.size(); j = i++) {
+        if ( ((polygon.points[i].y > point.y) != (polygon.points[j].y>point.y)) &&
+            (point.x < (polygon.points[j].x-polygon.points[i].x) * (point.y-polygon.points[i].y) / (polygon.points[j].y-polygon.points[i].y) + polygon.points[i].x) ){
+            cross++;
+        }
+    }
+    return bool(cross % 2);
+}
+
 WaypointPublisherNode::WaypointPublisherNode(){
 
   InitializeParams();
@@ -60,6 +128,8 @@ WaypointPublisherNode::WaypointPublisherNode(){
 
   //Publisher
   trajectory_pub = nh.advertise<mav_msgs::CommandTrajectory>("command/waypoint", 10);
+  point_viz_pub_ = nh.advertise<visualization_msgs::Marker>("waypoint_publisher_node_polygon_marker", 10);
+  point_viz_timer_ = nh.createWallTimer(ros::WallDuration(0.1), boost::bind(&WaypointPublisherNode::vizPubCallback, this));
 
   ROS_INFO_ONCE("Started Waypoint Publisher.");
 
@@ -86,6 +156,11 @@ void WaypointPublisherNode::InitializeParams(){
   threedNav_trajectory.position(0) = 0.0;
   threedNav_trajectory.position(1) = 0.0;
   threedNav_trajectory.position(2) = 0.0;
+
+  //Visualization
+  input_.header.frame_id = "map";
+  waiting_for_center_ = false;
+  waypoints_ready = false;
 
   ROS_INFO_ONCE("Waypoint_publisher_node Paramters Initialized.");
 
@@ -119,8 +194,169 @@ void WaypointPublisherNode::threedNavCallback(const mav_msgs::CommandTrajectoryC
 
 void WaypointPublisherNode::wayPointCallback(const geometry_msgs::PointStampedConstPtr& pointStampped)
 {
-  printf("I received point: (%f, %f, %f)", pointStampped->point.x, pointStampped->point.y, pointStampped->point.z);
+  printf("I received point: (%f, %f, %f)\n", pointStampped->point.x, pointStampped->point.y, pointStampped->point.z);
+
+  double average_distance = polygonPerimeter(input_.polygon) / input_.polygon.points.size();
+
+  if(waiting_for_center_){
+      //flag is set so this is the last point of boundary polygon, i.e. center
+      if(!pointInPolygon(pointStampped->point,input_.polygon)){
+          waypoints_ready = false;
+          ROS_ERROR("Center not inside polygon, restarting");
+      }else{
+          // Notify way points for drones
+        std::cout << "Path complete, will update waypoints for drones!\n";
+        waypoints.clear();
+        for(const auto& point : input_.polygon.points) {
+          waypoints.push_back(waypoint_utility.PointToWaypointWithTime(point));
+        }
+        int size = waypoints.size();
+        printf("Start publishing #%d waypoints \n", size);
+        i = 0;
+        waypoints_ready = true;
+      }
+      waiting_for_center_ = false;
+      input_.polygon.points.clear();
+  }else if(input_.polygon.points.empty()){
+      waypoints_ready = false;
+      //first control point, so initialize header of boundary polygon
+      input_.header = pointStampped->header;
+      input_.polygon.points.push_back(costmap_2d::toPoint32(pointStampped->point));
+  }else if(input_.header.frame_id != pointStampped->header.frame_id){
+      waypoints_ready = false;
+      ROS_ERROR("Frame mismatch, restarting polygon selection");
+      input_.polygon.points.clear();
+  }else if(input_.polygon.points.size() > 1 && pointsNearby(input_.polygon.points.front(), pointStampped->point,
+                                                              average_distance*0.1)){
+      waypoints_ready = false;
+      //check if last boundary point, i.e. nearby to first point
+      if(input_.polygon.points.size() < 3){
+          ROS_ERROR("Not a valid polygon, restarting");
+          input_.polygon.points.clear();
+      }else{
+          waiting_for_center_ = true;
+          ROS_WARN("Please select an initial point for exploration inside the polygon");
+      }
+  }else{
+      waypoints_ready = false;
+      //otherwise, must be a regular point inside boundary polygon
+      input_.polygon.points.push_back(costmap_2d::toPoint32(pointStampped->point));
+      input_.header.stamp = ros::Time::now();
+  }
 }
+
+/**
+     * @brief Publish markers for visualization of points for boundary polygon.
+     */
+void WaypointPublisherNode::vizPubCallback(){
+
+        visualization_msgs::Marker points, line_strip;
+
+        points.header = line_strip.header = input_.header;
+        points.ns = line_strip.ns = "explore_points";
+
+        points.id = 0;
+        line_strip.id = 1;
+
+        points.type = visualization_msgs::Marker::SPHERE_LIST;
+        line_strip.type = visualization_msgs::Marker::LINE_STRIP;
+
+        if(!input_.polygon.points.empty()){
+
+            points.action = line_strip.action = visualization_msgs::Marker::ADD;
+            points.pose.orientation.w = line_strip.pose.orientation.w = 1.0;
+
+            points.scale.x = points.scale.y = 0.1;
+            line_strip.scale.x = 0.05;
+
+            BOOST_FOREACH(geometry_msgs::Point32 point, input_.polygon.points){
+                line_strip.points.push_back(costmap_2d::toPoint(point));
+                points.points.push_back(costmap_2d::toPoint(point));
+            }
+
+            if(waiting_for_center_){
+                line_strip.points.push_back(costmap_2d::toPoint(input_.polygon.points.front()));
+                points.color.a = points.color.r = line_strip.color.r = line_strip.color.a = 1.0;
+            }else{
+                points.color.a = points.color.b = line_strip.color.b = line_strip.color.a = 1.0;
+            }
+        }else{
+            points.action = line_strip.action = visualization_msgs::Marker::DELETE;
+        }
+        point_viz_pub_.publish(points);
+        point_viz_pub_.publish(line_strip);
+
+    }
+
+void WaypointPublisherNode::publishNextWayPoints(){
+    if(i < waypoints.size()){
+
+      const WaypointWithTime& wp = waypoints[i];
+
+      if(!published){ 
+
+        printf("Publishing #%d x=%f y=%f z=%f yaw=%f, and wait for %fs. \n", (int)i, wp.wp.position.x, wp.wp.position.y, wp.wp.position.z, wp.wp.yaw, wp.waiting_time);
+
+        published = 1;
+        start_time = ros::Time::now().toSec();
+      }
+
+      if((current_time-start_time) < wp.waiting_time){
+
+        //Rotate into BF
+        waypointBF = control_mode.rotateGFtoBF(wp.wp.position.x-current_gps_.pose.pose.position.x, wp.wp.position.y-current_gps_.pose.pose.position.y, wp.wp.position.z, 0, 0, gps_yaw);
+
+        desired_wp.position.x = (current_gps_.pose.pose.position.x + waypointBF(0));
+        desired_wp.position.y = (current_gps_.pose.pose.position.y + waypointBF(1));
+        desired_wp.position.z = wp.wp.position.z;
+        desired_wp.yaw = wp.wp.yaw;
+
+        desired_wp.jerk.x = 1;
+
+        desired_wp.header.stamp = ros::Time::now();
+        desired_wp.header.frame_id = "desired_mission_frame";
+        trajectory_pub.publish(desired_wp);
+
+        current_time = ros::Time::now().toSec();
+ 
+      }
+      else{
+    
+        i = i + 1;
+        published = 0;
+
+      }        
+
+    } else {
+      std::cout << "i: " << i << ", waypoints.size(): " << waypoints.size() << "\n";
+    }
+}
+
+
+void WaypointPublisherNode::readWayPointsFromFile()
+{
+    if(!waypoints_read){
+      waypoints = waypoint_utility.Read_waypoints(waypoints);
+
+      int size = waypoints.size();
+      printf("Start publishing #%d waypoints \n", size);
+
+      waypoints_read = 1;
+    }
+
+    publishNextWayPoints();
+}
+
+void WaypointPublisherNode::liveWayPointsFromRviz(){
+  //std::cout << "inside liveWayPointsFromRviz\n";
+  if(waypoints_ready) {
+    //std::cout << "Waypoints are ready!\n";
+    publishNextWayPoints();
+  } else {
+    std::cout << "Waypoints are not ready!\n";
+  }
+}
+
 
 void WaypointPublisherNode::OdometryCallback(const nav_msgs::OdometryConstPtr& odometry_msg){
 
@@ -174,55 +410,9 @@ void WaypointPublisherNode::OdometryCallback(const nav_msgs::OdometryConstPtr& o
   if(control_mode.GetSwitchValue()){
 
     ROS_INFO("Waypoint Mission Mode triggered");
+    //readWayPointsFromFile();
+    liveWayPointsFromRviz();
 
-    if(!waypoints_read){
-      waypoints = waypoint_utility.Read_waypoints(waypoints);
-
-      int size = waypoints.size();
-      printf("Start publishing #%d waypoints \n", size);
-
-      waypoints_read = 1;
-    }
-
-    if(i < waypoints.size()){
-
-      const WaypointWithTime& wp = waypoints[i];
-
-      if(!published){ 
-
-        printf("Publishing #%d x=%f y=%f z=%f yaw=%f, and wait for %fs. \n", (int)i, wp.wp.position.x, wp.wp.position.y, wp.wp.position.z, wp.wp.yaw, wp.waiting_time);
-
-        published = 1;
-        start_time = ros::Time::now().toSec();
-      }
-
-      if((current_time-start_time) < wp.waiting_time){
-
-        //Rotate into BF
-        waypointBF = control_mode.rotateGFtoBF(wp.wp.position.x-current_gps_.pose.pose.position.x, wp.wp.position.y-current_gps_.pose.pose.position.y, wp.wp.position.z, 0, 0, gps_yaw);
-
-        desired_wp.position.x = (current_gps_.pose.pose.position.x + waypointBF(0));
-        desired_wp.position.y = (current_gps_.pose.pose.position.y + waypointBF(1));
-        desired_wp.position.z = wp.wp.position.z;
-        desired_wp.yaw = wp.wp.yaw;
-
-        desired_wp.jerk.x = 1;
-
-        desired_wp.header.stamp = ros::Time::now();
-        desired_wp.header.frame_id = "desired_mission_frame";
-        trajectory_pub.publish(desired_wp);
-
-        current_time = ros::Time::now().toSec();
- 
-      }
-      else{
-    
-        i = i + 1;
-        published = 0;
-
-      }        
-
-    }
   }
   //Autonomous Mode triggered
   else if(auto_mode.GetSwitchValue()){
@@ -275,7 +465,7 @@ void WaypointPublisherNode::OdometryCallback(const nav_msgs::OdometryConstPtr& o
   else{
    //clear waypoints variable
    ROS_INFO("RESET");
-   waypoints.clear();
+   //waypoints.clear();
    i = 0;
    waypoints_read = 0;
    published = 0;

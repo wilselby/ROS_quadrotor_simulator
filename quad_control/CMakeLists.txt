@@ -15,10 +15,11 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   planning_msgs
   tf
+  costmap_2d
 )
 
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED)
 
 
 ## Uncomment this if the package has a setup.py. This macro ensures
@@ -109,8 +110,8 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES quad_controller
-  CATKIN_DEPENDS cmake_modules geometry_msgs glog_catkin mav_msgs roscpp sensor_msgs planning_msgs tf
-#  DEPENDS system_lib
+  CATKIN_DEPENDS cmake_modules geometry_msgs glog_catkin mav_msgs roscpp sensor_msgs planning_msgs costmap_2d tf
+  DEPENDS Boost
 )
 
 ###########
@@ -120,7 +121,7 @@ catkin_package(
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
 # include_directories(include)
-include_directories(include  ${catkin_INCLUDE_DIRS}
+include_directories(include  ${catkin_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -153,7 +154,7 @@ add_dependencies(quad_controller ${catkin_EXPORTED_TARGETS})
 
 add_executable(waypoint_publisher_node src/nodes/waypoint_publisher_node.cpp)
 add_dependencies(waypoint_publisher_node ${catkin_EXPORTED_TARGETS})
-target_link_libraries(waypoint_publisher_node quad_controller ${catkin_LIBRARIES})
+target_link_libraries(waypoint_publisher_node quad_controller ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 add_executable(position_controller_node src/nodes/position_controller_node.cpp)
 add_dependencies(position_controller_node ${catkin_EXPORTED_TARGETS})
