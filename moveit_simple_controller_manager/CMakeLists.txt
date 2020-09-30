@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(moveit_simple_controller_manager)
+add_definitions(-std=c++11)
 
 if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
@@ -15,6 +16,7 @@ find_package(catkin COMPONENTS
   actionlib
   roscpp
   control_msgs
+  action_controller
   REQUIRED)
 
 include_directories(${catkin_INCLUDE_DIRS})
@@ -35,6 +37,7 @@ catkin_package(
 include_directories(include)
 
 add_library(moveit_simple_controller_manager src/moveit_simple_controller_manager.cpp)
+add_dependencies(moveit_simple_controller_manager action_controller_generate_messages_cpp)
 target_link_libraries(moveit_simple_controller_manager ${catkin_LIBRARIES} ${Boost_LIBRARIES})
 
 install(TARGETS moveit_simple_controller_manager LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION})
